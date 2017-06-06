@@ -13,15 +13,15 @@ def get_related_hashes(input_hash, output=False):
     #--------------------------------------------------------------------------
     # https://www.virustotal.com/en/documentation/public-api/#audience
     apiKey = 'insert_virustotal_api_key_here'
-
+    
     related_hashes = [] # initialize list
+    api_url = 'https://www.virustotal.com/vtapi/v2/file/report'
+    params = {'apikey': apiKey, 'resource': input_hash_value}
+    headers = {"Accept-Encoding": "gzip, deflate",}
 
     #--------------------------------------------------------------------------
     # make API request to look up input_hash_value
     #--------------------------------------------------------------------------
-    api_url = 'https://www.virustotal.com/vtapi/v2/file/report'
-    params = {'apikey': apiKey, 'resource': input_hash_value}
-    headers = {"Accept-Encoding": "gzip, deflate",}
     response = requests.get(api_url, params=params, headers=headers)
     json_response = response.json()
 
@@ -53,9 +53,6 @@ def get_related_hashes(input_hash, output=False):
     #--------------------------------------------------------------------------
     # make API requests for each related hash
     #--------------------------------------------------------------------------
-    api_url = 'https://www.virustotal.com/vtapi/v2/file/report'
-    headers = {"Accept-Encoding": "gzip, deflate",}
-
     result_hashes = [] # initialize return list
 
     for item in related_hashes:
