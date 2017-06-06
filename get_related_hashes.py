@@ -13,7 +13,7 @@ def get_related_hashes(input_hash, output=False):
     #--------------------------------------------------------------------------
     # https://www.virustotal.com/en/documentation/public-api/#audience
     apiKey = 'insert_virustotal_api_key_here'
-    
+
     related_hashes = [] # initialize list
     api_url = 'https://www.virustotal.com/vtapi/v2/file/report'
     params = {'apikey': apiKey, 'resource': input_hash_value}
@@ -56,8 +56,6 @@ def get_related_hashes(input_hash, output=False):
     result_hashes = [] # initialize return list
 
     for item in related_hashes:
-        params = {'apikey': apiKey, 'resource': item}
-        response = requests.get(api_url, params=params, headers=headers)
         try:
             if output:
                 print(response.json()[hash_type])
