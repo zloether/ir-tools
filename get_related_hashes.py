@@ -5,39 +5,60 @@
 # import modules
 from sys import argv
 import requests, re, time
+try:
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning
+    bundled = True
+except:
+    import urllib3
+    from urllib3.exceptions import InsecureRequestWarning
+    bundled = False
 
-def get_related_hashes(input_hash, output=False):
-
+def get_related_hashes(input_hash, verify=True, output=False):
     #--------------------------------------------------------------------------
     # global variables
     #--------------------------------------------------------------------------
     # https://www.virustotal.com/en/documentation/public-api/#audience
-    apiKey = 'insert_virustotal_api_key_here'
-
-    related_hashes = [] # initialize list
+    #apiKey = 'insert_virustotal_api_key_here'
     api_url = 'https://www.virustotal.com/vtapi/v2/file/report'
     params = {'apikey': apiKey, 'resource': input_hash_value}
     headers = {"Accept-Encoding": "gzip, deflate",}
+    if not verify:
+        if bundled:
+            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+        else:
+            urllib3.disable_warnings(InsecureRequestWarning)
+
+    related_hashes = [] # initialize list
 
     #--------------------------------------------------------------------------
     # make API request to look up input_hash_value
     #--------------------------------------------------------------------------
-    response = requests.get(api_url, params=params, headers=headers)
-    json_response = response.json()
+    response = requests.get(api_url, params=params, headers=headers, verify=verify)
+    try:
+        json_response = response.json()
+    except:
+        print(response.status_code)
+        print(reponse.text)
+        exit()
 
     permalink = json_response['permalink']
 
     #--------------------------------------------------------------------------
     # make web request and parse out related hashes
     #--------------------------------------------------------------------------
-    related_response = requests.get(permalink)
+    related_response = requests.get(permalink, verify=verify)
 
     regex_pattern = r'<a\Wtarget="\_blank\"\Whref="/en/file/[0-9a-f]+/analysis/">'
 
-    matches = re.findall(regex_pattern, related_response.text, re.IGNORECASE)
+    try:
+        matches = re.findall(regex_pattern, related_response.text, re.IGNORECASE)
+    except:
+        print(related_response.status_code)
+        print(related_response.text)
+        exit()
 
     for item in matches: # iterate through response
-        related_hashes.append(item.split("/")[3])
+        related_hashes.append(item.split("/")[3]) # parse out the desired text
 
     #--------------------------------------------------------------------------
     # print expected time to completion
@@ -53,10 +74,13 @@ def get_related_hashes(input_hash, output=False):
     #--------------------------------------------------------------------------
     # make API requests for each related hash
     #--------------------------------------------------------------------------
-    result_hashes = [] # initialize return list
+    if not output:
+        result_hashes = [] # initialize return list
 
     for item in related_hashes:
         try:
+            params = {'apikey': apiKey, 'resource': item}
+            response = requests.get(api_url, params=params, headers=headers, verify=verify)
             if output:
                 print(response.json()[hash_type])
             else:
@@ -83,4 +107,4 @@ if __name__ == "__main__":
                 " using the provided hash type (e.g., md5, sha1, or sha256)")
         exit()
 
-    get_related_hashes(input_hash_value, True)
+    get_related_hashes(input_hash_value, verify=True, output=True)
