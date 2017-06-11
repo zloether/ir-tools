@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# get_related_hashes.py
+# virustotal_related_hashes.py
 # sample malicious hash: db349b97c37d22f5ea1d1841e3c89eb4
 
 # import modules
@@ -18,7 +18,7 @@ def get_related_hashes(input_hash, verify=True, output=False):
     # global variables
     #--------------------------------------------------------------------------
     # https://www.virustotal.com/en/documentation/public-api/#audience
-    #apiKey = 'insert_virustotal_api_key_here'
+    apiKey = 'insert_virustotal_api_key_here'
     api_url = 'https://www.virustotal.com/vtapi/v2/file/report'
     params = {'apikey': apiKey, 'resource': input_hash_value}
     headers = {"Accept-Encoding": "gzip, deflate",}
